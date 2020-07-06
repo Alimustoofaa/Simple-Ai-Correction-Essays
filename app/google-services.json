@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "244787043717",
+    "firebase_url": "https://ocrapplication-7e9c2.firebaseio.com",
+    "project_id": "ocrapplication-7e9c2",
+    "storage_bucket": "ocrapplication-7e9c2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244787043717:android:96aa363172798ca2f378ec",
+        "android_client_info": {
+          "package_name": "com.alimustofa.textrecognition"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "244787043717-qtjb9taervgpma6cm1vloat3a87u4j1m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfeo2z7zxZoOfLajTjpiQEz2zLIwXSuJw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "244787043717-qtjb9taervgpma6cm1vloat3a87u4j1m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

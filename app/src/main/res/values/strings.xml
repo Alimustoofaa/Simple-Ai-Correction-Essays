@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Text Recognition</string>
+    <string name="q_and_a"><![CDATA[Question & Answer]]></string>
+    <string name="correction">Correction</string>
+</resources>
