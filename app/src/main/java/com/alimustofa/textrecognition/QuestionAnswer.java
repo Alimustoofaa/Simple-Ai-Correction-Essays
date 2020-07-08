@@ -13,6 +13,8 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -29,6 +31,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.alimustofa.textrecognition.database.DbQuestionAndAnswer;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -64,6 +67,8 @@ public class QuestionAnswer extends AppCompatActivity {
 
     Uri image_uri;
 
+    public DbQuestionAndAnswer db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +85,8 @@ public class QuestionAnswer extends AppCompatActivity {
         imAnswer = findViewById(R.id.imageIv_answer);
         btnSave = findViewById(R.id.btn_save);
 
+        db = new DbQuestionAndAnswer(getBaseContext());
+
         // camera permission
         cameraPermission = new String[]{Manifest.permission.CAMERA,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -89,62 +96,39 @@ public class QuestionAnswer extends AppCompatActivity {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    saveQuestionAnswer();
-                } catch (FileNotFoundException e){
-                    Toast.makeText(QuestionAnswer.this, ""+e, Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(QuestionAnswer.this, ""+e, Toast.LENGTH_SHORT).show();
-                }
+                saveQuestionAnswer();
             }
         });
     }
 
-    private void saveQuestionAnswer() throws IOException {
-        String question = etQuestion.getText().toString();
-        String answer = etAnswer.getText().toString();
-        if (!answer.isEmpty() && !question.isEmpty()){
-            String state = Environment.getExternalStorageState();
-            if (Environment.MEDIA_MOUNTED.equals(state)){
-                File dirExternal = Environment.getExternalStorageDirectory();
+    private void saveQuestionAnswer()  {
 
-                File createDir = new File(dirExternal.getAbsolutePath()+"/QuestionAndAnswer");
-                if (!createDir.exists()){
-                    createDir.mkdir();
-                    File file = new File(createDir, "QuestionAndAnswer.text");
-                    FileOutputStream fileOutputStream;
-                    try {
-                        fileOutputStream = new FileOutputStream(file);
-                        fileOutputStream.write(question.getBytes());
-                        fileOutputStream.write(answer.getBytes());
-                        fileOutputStream.close();
-                        Toast.makeText(getApplicationContext(), "Data Disimpan di External", Toast.LENGTH_SHORT).show();
-                    }catch (IOException ex){
-                        ex.printStackTrace();
-                    }
-                } else {
-                    File file = new File(createDir, "QuestionAndAnswer.text");
-                    FileOutputStream fileOutputStream;
-                    try {
-                        fileOutputStream =new FileOutputStream(file);
-                        fileOutputStream.write(question.getBytes());
-                        fileOutputStream.write(answer.getBytes());
-                        fileOutputStream.close();
-                        Toast.makeText(getApplicationContext(), "Data Disimpan di External", Toast.LENGTH_SHORT).show();
-                    }catch (IOException ex){
-                        ex.printStackTrace();
-                    }
-                }
-                etAnswer.getText().clear();
-                etQuestion.getText().clear();
-                imAnswer.setImageDrawable(null);
-                imQuestion.setImageDrawable(null);
-            }else {
-                Toast.makeText(getApplicationContext(), "Penyimpanan External Tidak Tersedia", Toast.LENGTH_SHORT).show();
+        String setAnswer = etAnswer.getText().toString();
+        String setQuestion = etQuestion.getText().toString();
+        if (!setAnswer.isEmpty() && !setQuestion.isEmpty()){
+            SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
+
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(DbQuestionAndAnswer.column.answer, setAnswer);
+            contentValues.put(DbQuestionAndAnswer.column.question, setQuestion);
+
+            try {
+                sqLiteDatabase.insert(DbQuestionAndAnswer.column.tableName, null, contentValues);
+                Toast.makeText(this, "Success add Question and Answer", Toast.LENGTH_SHORT).show();
+                clearData();
+            }catch (SQLException e){
+                Toast.makeText(this, ""+e, Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(getApplicationContext(), "Question or Answer is empty", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void clearData() {
+        etQuestion.setText("");
+        etAnswer.setText("");
+        imQuestion.setImageDrawable(null);
+        imAnswer.setImageDrawable(null);
     }
 
     //action bar
@@ -196,7 +180,6 @@ public class QuestionAnswer extends AppCompatActivity {
         });
         dialog.create().show();
     }
-
 
     private void showImageImportDialog() {
         // item to display dialog
