@@ -21,7 +21,7 @@ public class Home extends AppCompatActivity {
         btn_qna.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Home.this, QuestionAnswer.class);
+                Intent intent = new Intent(Home.this, ListQuestionAnswer.class);
                 startActivity(intent);
             }
         });
