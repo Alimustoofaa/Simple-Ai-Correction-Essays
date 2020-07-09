@@ -5,6 +5,8 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
@@ -29,6 +31,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.alimustofa.textrecognition.database.DbQuestionAndAnswer;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.vision.Frame;
@@ -49,9 +52,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+
+    private DbQuestionAndAnswer db;
 
     EditText mResultsEt, mResultsEt1;
     ImageView mPreviewIv;
@@ -81,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
         mAnswerRg = findViewById(R.id.rgAnswer);
         mTrueRb = findViewById(R.id.rbTrue);
         mFalseRb = findViewById(R.id.rbFalse);
+
+        db = new DbQuestionAndAnswer(getBaseContext());
 
         // camera permission
         cameraPermission = new String[]{Manifest.permission.CAMERA,
@@ -263,85 +272,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void correction(final String resultAnswer) {
-//        String resultAnswerArr = Arrays.toString(resultAnswer.split(" "));
-        String[] answerArr = resultAnswer.split(" ");
-        List<String> resultTextFile = new ArrayList<String>();
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)){
-            File dirExternal = Environment.getExternalStorageDirectory();
-            File readDir = new File(dirExternal.getAbsolutePath()+"/QuestionAndAnswer");
-            if (readDir.exists()){
-                File file = new File(readDir, "QuestionAndAnswer.text");
-                FileOutputStream fos = null;
-                //StringBuilder text = new StringBuilder();
-                try {
-                    BufferedReader br = new BufferedReader(new FileReader(file));
-                    String line;
-                    while ((line = br.readLine()) != null){
-                        resultTextFile.add(line);
-//                        text.append(line);
-//                        text.append('\n');
-                    }
-                    br.close();
-                } catch (IOException e){
-                    Toast.makeText(this, ""+e, Toast.LENGTH_SHORT).show();
-                }
-                for (int i = 0; i < resultTextFile.size(); i++){
-                    for (int j = 0; j < answerArr.length; j++){
-                        if (resultTextFile.get(i).equals(answerArr[j])){
-                           if(answerArr[j].length()>0){
-                                mTrueRb.setChecked(true);
-                           }
-                            if(answerArr[j].length() == 0){
-                                mFalseRb.setChecked(true);
-                            }
-                        }
-                    }
-                    if (!mTrueRb.isChecked()){
-                        mFalseRb.setChecked(true);
-                    }
+        String[] answerArr = resultAnswer.split("\\s+");
+
+        SQLiteDatabase readData = db.getReadableDatabase();
+        Cursor resultsAnswer = readData.rawQuery("SELECT "+DbQuestionAndAnswer.column.answer+" FROM "+DbQuestionAndAnswer.column.tableName, null);
+
+        String[] answerDbArr = new String[resultsAnswer.getCount()];
+
+        resultsAnswer.moveToFirst();
+        for (int i = 0; i < resultsAnswer.getCount(); i++){
+            resultsAnswer.moveToPosition(i);
+            answerDbArr[i] = resultsAnswer.getString(0);
+        }
+
+        // equals answerDbArr and answerArr get score
+        for (String answerA : answerDbArr) {
+            for (String answerB : answerArr) {
+                if (answerA.equals(answerB)) {
+                    Log.d("TAG", "correction: " + answerB);
+                    mTrueRb.setChecked(true);
+                    break;
                 }
             }
-
+        }
+        if (!mTrueRb.isChecked()){
+            mFalseRb.setChecked(true);
         }
     }
-
-    private void detectVision() throws IOException {
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) mPreviewIv.getDrawable();
-        Bitmap bitmap = bitmapDrawable.getBitmap();
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
-        FirebaseVisionTextRecognizer textRecognizer = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
-        textRecognizer.processImage(image).addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
-            @Override
-            public void onSuccess(FirebaseVisionText firebaseVisionText) {
-
-                String results = firebaseVisionText.getText().toLowerCase();
-                if (results.contains("1+1")){
-                    if (results.contains("2")){
-                        mResultsEt1.setText("Benar");
-                    } else {
-                        mResultsEt1.setText("Salah");
-                    }
-                } else if (results.contains("2+2")){
-                    if (results.contains("4")){
-                        mResultsEt1.setText("Benar");
-                    } else {
-                        mResultsEt1.setText("Salah");
-                    }
-                } else {
-                    if (results.isEmpty()){
-                        mResultsEt1.setText("Silahkan skan lagi");
-                    }
-                }
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(MainActivity.this, ""+e, Toast.LENGTH_SHORT).show();
-            }
-        });
-        
-    }
-
 }
