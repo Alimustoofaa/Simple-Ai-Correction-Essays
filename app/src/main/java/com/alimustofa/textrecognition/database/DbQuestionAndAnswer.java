@@ -12,14 +12,18 @@ public class DbQuestionAndAnswer extends SQLiteOpenHelper {
         public static final String id = "id";
         public static final String question = "question";
         public static final String answer = "answer";
+        public static final String imageQuestion = "imageQuestion";
+        public static final String imageAnswer = "imageAnswer";
     }
     public static final String DATABASE_NAME = "db_correction.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     public static  final String SQL_CREATE_ENTRIES = "CREATE TABLE "+column.tableName+" ("+
             column.id+" INTEGER PRIMARY KEY  AUTOINCREMENT,"+
             column.question+" TEXT NOT NULL,"+
-            column.answer+" TEXT NOT NULL)";
+            column.answer+" TEXT NOT NULL," +
+            column.imageQuestion+" BLOB,"+
+            column.imageAnswer+" BLOB)";
 
     public static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS "+column.tableName;
 

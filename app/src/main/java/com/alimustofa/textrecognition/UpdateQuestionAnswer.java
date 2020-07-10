@@ -16,10 +16,10 @@ import android.content.pm.PackageManager;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.SparseArray;
@@ -39,22 +39,13 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
-public class QuestionAnswer extends AppCompatActivity {
+public class UpdateQuestionAnswer extends AppCompatActivity {
 
     EditText etQuestion, etAnswer;
     ImageView imQuestion, imAnswer;
-    Button btnSave;
+    Button btnUpdate;
 
     private static final int CAMERA_REQUEST_CODE = 200;
     private static final int STORAGE_REQUEST_CODE = 400;
@@ -68,6 +59,7 @@ public class QuestionAnswer extends AppCompatActivity {
 
     Uri image_uri;
 
+    public String id;
     public DbQuestionAndAnswer db;
 
     @Override
@@ -84,9 +76,24 @@ public class QuestionAnswer extends AppCompatActivity {
         etAnswer = findViewById(R.id.resultEt_answer);
         imQuestion = findViewById(R.id.imageIv_question);
         imAnswer = findViewById(R.id.imageIv_answer);
-        btnSave = findViewById(R.id.btn_save);
+        btnUpdate = findViewById(R.id.btn_save);
 
         db = new DbQuestionAndAnswer(getBaseContext());
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null){
+            final byte[] ImQuestion = (byte[]) bundle.getByteArray("ImQuestion");
+            Bitmap bitmap = BitmapFactory.decodeByteArray(ImQuestion, 0, ImQuestion.length);
+
+            String Id = bundle.getString("Id");
+            String question = bundle.getString("Question");
+            String answer = bundle.getString("Answer");
+            id = Id;
+            etQuestion.setText(question);
+            etAnswer.setText(answer);
+            imQuestion.setImageBitmap(bitmap);
+        }
+
 
         // camera permission
         cameraPermission = new String[]{Manifest.permission.CAMERA,
@@ -94,15 +101,17 @@ public class QuestionAnswer extends AppCompatActivity {
         // storage permission
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveQuestionAnswer();
+                updateQuestionAnswer();
+                startActivity(new Intent(UpdateQuestionAnswer.this, ListQuestionAnswer.class));
+                finish();
             }
         });
     }
 
-    private void saveQuestionAnswer()  {
+    private void updateQuestionAnswer()  {
 
         String setAnswer = etAnswer.getText().toString();
         String setQuestion = etQuestion.getText().toString();
@@ -118,8 +127,10 @@ public class QuestionAnswer extends AppCompatActivity {
             contentValues.put(DbQuestionAndAnswer.column.imageAnswer, setImageAnswer);
 
             try {
-                sqLiteDatabase.insert(DbQuestionAndAnswer.column.tableName, null, contentValues);
-                Toast.makeText(this, "Success add Question and Answer", Toast.LENGTH_SHORT).show();
+                String section = DbQuestionAndAnswer.column.id + " LIKE ?";
+                String[] sectionArgs ={id};
+                sqLiteDatabase.update(DbQuestionAndAnswer.column.tableName, contentValues, section, sectionArgs);
+                Toast.makeText(this, "Success Update"+setQuestion, Toast.LENGTH_SHORT).show();
                 clearData();
             }catch (SQLException e){
                 Toast.makeText(this, ""+e, Toast.LENGTH_SHORT).show();
@@ -366,6 +377,5 @@ public class QuestionAnswer extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-
 
 }

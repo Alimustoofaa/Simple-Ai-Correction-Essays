@@ -2,8 +2,6 @@ package com.alimustofa.textrecognition;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,15 +11,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 import com.alimustofa.textrecognition.adapter.AdapterQuestionAndAnswer;
 import com.alimustofa.textrecognition.database.DbQuestionAndAnswer;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class ListQuestionAnswer extends AppCompatActivity {
 
@@ -30,8 +25,11 @@ public class ListQuestionAnswer extends AppCompatActivity {
     private RecyclerView.Adapter<AdapterQuestionAndAnswer.ViewHolder> adapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    private ArrayList<String> idList;
     private ArrayList<String> questionList;
     private ArrayList<String> answerList;
+    private ArrayList<byte[]> ImQuestionList;
+    private ArrayList<byte[]> ImAnswerList;
 
     FloatingActionButton mAddFab;
 
@@ -42,8 +40,11 @@ public class ListQuestionAnswer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_question_answer);
 
+        idList = new ArrayList<String>();
         questionList = new ArrayList<String>();
         answerList = new ArrayList<String>();
+        ImQuestionList = new ArrayList<byte[]>();
+        ImAnswerList = new ArrayList<byte[]>();
 
         db = new DbQuestionAndAnswer(getBaseContext());
 
@@ -55,7 +56,7 @@ public class ListQuestionAnswer extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
-        adapter = new AdapterQuestionAndAnswer(questionList, answerList);
+        adapter = new AdapterQuestionAndAnswer(idList, questionList, answerList, ImQuestionList, ImAnswerList);
 
         recyclerView.setAdapter(adapter);
         mAddFab.setOnClickListener(new View.OnClickListener() {
@@ -76,8 +77,11 @@ public class ListQuestionAnswer extends AppCompatActivity {
         for (int i = 0; i < cursor.getCount(); i++){
             cursor.moveToPosition(i);
 
+            idList.add(cursor.getString(0));
             questionList.add(cursor.getString(1));
             answerList.add(cursor.getString(2));
+            ImQuestionList.add(cursor.getBlob(3));
+            ImAnswerList.add(cursor.getBlob(4));
         }
     }
 
