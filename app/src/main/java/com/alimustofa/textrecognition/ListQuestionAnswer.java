@@ -83,6 +83,7 @@ public class ListQuestionAnswer extends AppCompatActivity {
             ImQuestionList.add(cursor.getBlob(3));
             ImAnswerList.add(cursor.getBlob(4));
         }
+        cursor.close();
     }
 
 }

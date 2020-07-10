@@ -145,6 +145,7 @@ public class AdapterQuestionAndAnswer extends RecyclerView.Adapter<AdapterQuesti
         questionList.remove(position);
         notifyItemRemoved(position);
         Toast.makeText(view.getContext(), "Data "+answer+" success deleted", Toast.LENGTH_SHORT).show();
+        deleteData.close();
     }
 
 

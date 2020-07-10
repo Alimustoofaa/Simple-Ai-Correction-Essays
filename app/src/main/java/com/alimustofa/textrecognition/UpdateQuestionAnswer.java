@@ -105,8 +105,6 @@ public class UpdateQuestionAnswer extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 updateQuestionAnswer();
-                startActivity(new Intent(UpdateQuestionAnswer.this, ListQuestionAnswer.class));
-                finish();
             }
         });
     }
@@ -115,9 +113,11 @@ public class UpdateQuestionAnswer extends AppCompatActivity {
 
         String setAnswer = etAnswer.getText().toString();
         String setQuestion = etQuestion.getText().toString();
-        byte[] setImageQuestion = imageToByte(imQuestion);
-        byte[] setImageAnswer = imageToByte(imAnswer);
+
         if (!setAnswer.isEmpty() && !setQuestion.isEmpty() && imQuestion.getDrawable() != null && imAnswer.getDrawable() != null){
+            byte[] setImageQuestion = imageToByte(imQuestion);
+            byte[] setImageAnswer = imageToByte(imAnswer);
+
             SQLiteDatabase sqLiteDatabase = db.getWritableDatabase();
 
             ContentValues contentValues = new ContentValues();
@@ -130,8 +130,11 @@ public class UpdateQuestionAnswer extends AppCompatActivity {
                 String section = DbQuestionAndAnswer.column.id + " LIKE ?";
                 String[] sectionArgs ={id};
                 sqLiteDatabase.update(DbQuestionAndAnswer.column.tableName, contentValues, section, sectionArgs);
+                sqLiteDatabase.close();
                 Toast.makeText(this, "Success Update"+setQuestion, Toast.LENGTH_SHORT).show();
                 clearData();
+                startActivity(new Intent(UpdateQuestionAnswer.this, ListQuestionAnswer.class));
+                finish();
             }catch (SQLException e){
                 Toast.makeText(this, ""+e, Toast.LENGTH_SHORT).show();
             }

@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void correction(final String resultAnswer) {
-        String[] answerArr = resultAnswer.split("\\s+");
+        String[] answerArr = resultAnswer.toLowerCase().split("\\s+");
 
         SQLiteDatabase readData = db.getReadableDatabase();
         Cursor resultsAnswer = readData.rawQuery("SELECT "+DbQuestionAndAnswer.column.answer+" FROM "+DbQuestionAndAnswer.column.tableName, null);
@@ -333,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
         resultsAnswer.moveToFirst();
         for (int i = 0; i < resultsAnswer.getCount(); i++){
             resultsAnswer.moveToPosition(i);
-            answerDbArr[i] = resultsAnswer.getString(0);
+            answerDbArr[i] = resultsAnswer.getString(0).toLowerCase();
         }
 
         // equals answerDbArr and answerArr get score
@@ -346,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        readData.close();
         if (!mTrueRb.isChecked()){
             mFalseRb.setChecked(true);
         }

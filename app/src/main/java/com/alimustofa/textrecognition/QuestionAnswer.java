@@ -121,6 +121,9 @@ public class QuestionAnswer extends AppCompatActivity {
                 sqLiteDatabase.insert(DbQuestionAndAnswer.column.tableName, null, contentValues);
                 Toast.makeText(this, "Success add Question and Answer", Toast.LENGTH_SHORT).show();
                 clearData();
+                sqLiteDatabase.close();
+                startActivity(new Intent(QuestionAnswer.this, ListQuestionAnswer.class));
+                finish();
             }catch (SQLException e){
                 Toast.makeText(this, ""+e, Toast.LENGTH_SHORT).show();
             }
