@@ -69,30 +69,48 @@
                         android:textColor="#000"
                         android:background="@null"/>
 
-                    <RadioGroup
-                        android:id="@+id/rgAnswer"
-                        android:layout_width="wrap_content"
+                    <RelativeLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_below="@id/resultEt"
-                        android:padding="5dp">
-                        <RadioButton
-                            android:id="@+id/rbTrue"
+                        android:orientation="horizontal">
+                        <RadioGroup
+                            android:id="@+id/rgAnswer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Benar"
-                            android:paddingRight="50dp"
-                            android:paddingEnd="50dp"
-                            tools:ignore="RtlSymmetry" />
-                        <RadioButton
-                            android:id="@+id/rbFalse"
+                            android:orientation="horizontal"
+                            android:padding="5dp">
+                            <RadioButton
+                                android:id="@+id/rbTrue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Benar"
+                                android:paddingRight="50dp"
+                                android:paddingEnd="50dp"
+                                tools:ignore="RtlSymmetry" />
+                            <RadioButton
+                                android:id="@+id/rbFalse"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Salah"
+                                android:paddingRight="10dp"
+                                android:paddingEnd="10dp"
+                                tools:ignore="RtlSymmetry" />
+                        </RadioGroup>
+
+                        <ImageButton
+                            android:id="@+id/ibRetry"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Salah"
-                            android:paddingRight="10dp"
-                            android:paddingEnd="10dp"
-                            tools:ignore="RtlSymmetry" />
-                    </RadioGroup>
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentRight="true"
+                            android:layout_gravity="end|bottom"
+                            android:contentDescription="Add"
+                            android:src="@drawable/ic_action_refresh"
+                            android:layout_alignParentEnd="true"
+                            android:background="#00FFFFFF" />
+                    </RelativeLayout>
+
+
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

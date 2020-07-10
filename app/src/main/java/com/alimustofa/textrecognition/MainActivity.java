@@ -8,7 +8,9 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,7 +19,9 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -46,6 +50,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     ImageView mPreviewIv;
     RadioGroup mAnswerRg;
     RadioButton mTrueRb, mFalseRb;
+    ImageButton mRetryIb;
 
     private static final int CAMERA_REQUEST_CODE = 200;
     private static final int STORAGE_REQUEST_CODE = 400;
@@ -83,11 +89,11 @@ public class MainActivity extends AppCompatActivity {
         assert actionBar != null;
         actionBar.setSubtitle("Click + button to insert image");
         mResultsEt = findViewById(R.id.resultEt);
-        mResultsEt1 = findViewById(R.id.resultEt1);
         mPreviewIv = findViewById(R.id.imageIv);
         mAnswerRg = findViewById(R.id.rgAnswer);
         mTrueRb = findViewById(R.id.rbTrue);
         mFalseRb = findViewById(R.id.rbFalse);
+        mRetryIb = findViewById(R.id.ibRetry);
 
         db = new DbQuestionAndAnswer(getBaseContext());
 
@@ -96,6 +102,51 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE};
         // storage permission
         storagePermission = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        retryCorrection();
+
+        mRetryIb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mPreviewIv.getDrawable() != null && mResultsEt.getText() != null) {
+                    Drawable drawable = mPreviewIv.getDrawable();
+                    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                            drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("answer", mResultsEt.getText().toString());
+
+                    bundle.putByteArray("image", byteArray);
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                    MainActivity.this.finish();
+                } else {
+                    Toast.makeText(MainActivity.this, "Pick Answer please", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void retryCorrection() {
+        if (getIntent().getExtras() != null){
+            Bundle bundle = getIntent().getExtras();
+            byte[] byteArray = bundle.getByteArray("image");
+            assert byteArray != null;
+            Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+
+            String answer = bundle.getString("answer");
+            mResultsEt.setText(answer);
+            mPreviewIv.setImageBitmap(bmp);
+
+            correction(mResultsEt.getText().toString());
+        } else {
+            Log.d("TAG BUNDLE", "No bundle: ");
+        }
+
     }
 
     //action bar
